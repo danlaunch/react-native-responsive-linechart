@@ -13,7 +13,8 @@ class LineChart extends Component {
     this.state = { dimensions: undefined, tooltipIndex: undefined, layoutX: 0 };
     this.recalculate = memoizeOne(this.recalculate);
 
-    if (_.get(props.config, "tooltip.visible", false) && props.config.interpolation !== "spline") {
+    // if (_.get(props.config, "tooltip.visible", false) && props.config.interpolation !== "spline") {
+      if (_.get(props.config, "tooltip.visible", false)) {
       this._panResponder = PanResponder.create({
         onMoveShouldSetPanResponder: (evt, gestureState) => {
           if (Math.abs(gestureState.dx) > 10) {
@@ -22,7 +23,7 @@ class LineChart extends Component {
 
           const xTouch = -this.state.layoutX + gestureState.moveX - this.gridOffset.x + this.props.scrollOffset;
           if (this.state.dimensions && this.points) {
-            idx = Math.round((xTouch / this.gridSize.width) * (this.props.data.length - 1));
+            idx = Math.round((xTouch / this.gridSize.width) * (this.points.length - 1));
             if (this.state.tooltipIndex != idx) {
               this.setState({ tooltipIndex: idx });
             }
@@ -171,22 +172,20 @@ class LineChart extends Component {
   }
 
   onLayout = event => {
-    console.log(event.nativeEvent);
     const { width, height } = event.nativeEvent.layout;
     this.setState({ dimensions: { width, height } });
   };
 
   renderTooltip(mergedConfig) {
     const { tooltip } = mergedConfig;
-
-    const dataX = this.points[this.state.tooltipIndex].x;
-    const dataY = this.points[this.state.tooltipIndex].y;
-
-    const dataValue = this.props.data[this.state.tooltipIndex];
+    const tootipIndex = this.state.tooltipIndex;
+    const dataX = this.points[tootipIndex].x;
+    const dataY = this.points[tootipIndex].y;
+    const dataValue = dataY;//this.props.data[this.state.tooltipIndex];
 
     const textWidth = tooltip.textFormatter(dataValue).length * tooltip.textFontSize * 0.66 + tooltip.boxPaddingX;
     const textHeight = tooltip.textFontSize * 1.5 + tooltip.boxPaddingY;
-
+    
     return (
       <React.Fragment>
         <Line
